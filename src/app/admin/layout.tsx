@@ -1,5 +1,6 @@
 import { CalendarDays, Settings, Users, LayoutDashboard, ExternalLink } from "lucide-react";
 import Link from "next/link";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { AdminSidebarUser } from "./AdminSidebarUser";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
