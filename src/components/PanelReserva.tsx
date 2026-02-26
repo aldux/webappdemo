@@ -32,7 +32,7 @@ const HORARIOS_DEFAULT: HorarioDia[] = [
   { dia: "Domingo", abierto: false, desde: "09:00", hasta: "14:00" },
 ];
 
-export function PanelReserva() {
+export function PanelReserva({ logoUrl }: { logoUrl?: string }) {
   const [config, setConfig] = useState<Config | null>(null);
   const [servicios, setServicios] = useState(SERVICIOS_DEFAULT);
   const [horarios, setHorarios] = useState<Config["horarios"]>([]);
@@ -93,8 +93,8 @@ export function PanelReserva() {
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-400 opacity-80" />
         <CardContent className="pt-8 pb-8">
           <div className="flex flex-col items-center text-center gap-6">
-            <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center">
-              <CheckCircle2 className="w-10 h-10 text-emerald-500" />
+            <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
+              <CheckCircle2 className="w-10 h-10 text-primary" />
             </div>
             <div>
               <h3 className="text-xl font-semibold text-foreground">Reserva exitosa</h3>
@@ -104,7 +104,7 @@ export function PanelReserva() {
             </div>
             <Button
               variant="outline"
-              className="border-emerald-500/50 text-emerald-500 hover:bg-emerald-500/10"
+              className="border-primary/50 text-primary hover:bg-primary/10"
               onClick={hacerOtraReserva}
             >
               Hacer otra reserva
@@ -117,13 +117,22 @@ export function PanelReserva() {
 
   return (
     <Card className="backdrop-blur-xl bg-background/60 border-border/50 shadow-2xl shadow-black/20 relative z-10 overflow-hidden">
-      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-400 opacity-80" />
+      <div className="absolute inset-x-0 top-0 h-1 bg-primary opacity-80" style={{ background: "linear-gradient(90deg, var(--primary), var(--chart-1))" }} />
       <CardHeader className="pb-4">
-        <CardTitle className="text-2xl font-medium flex items-center gap-2">
-          <CalendarDays className="w-5 h-5 text-emerald-400" />
-          Reserva tu turno
-        </CardTitle>
-        <CardDescription>Elige servicio, fecha y horario según la disponibilidad del comercio.</CardDescription>
+        <div className="flex items-center gap-3">
+          {logoUrl ? (
+            <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-border bg-secondary/50 flex-shrink-0">
+              <img src={logoUrl} alt="" className="w-full h-full object-cover" />
+            </div>
+          ) : null}
+          <div>
+            <CardTitle className="text-2xl font-medium flex items-center gap-2">
+              <CalendarDays className="w-5 h-5 text-primary" />
+              Reserva tu turno
+            </CardTitle>
+            <CardDescription>Elige servicio, fecha y horario según la disponibilidad del comercio.</CardDescription>
+          </div>
+        </div>
       </CardHeader>
 
       <CardContent className="space-y-6">

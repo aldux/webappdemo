@@ -1,6 +1,6 @@
 export const RESERVAS_KEY = "webapp-reservas";
 
-export type EstadoReserva = "confirmado" | "cancelado";
+export type EstadoReserva = "pendiente" | "confirmado" | "cancelado";
 
 export type Reserva = {
   id: string;
@@ -41,6 +41,7 @@ export function getReservasPorFecha(fecha: string): Reserva[] {
   return loadReservas().filter((r) => r.fecha === fecha && r.estado !== "cancelado");
 }
 
+
 export function getReservasHoy(): Reserva[] {
   const hoy = new Date().toISOString().slice(0, 10);
   return getReservasPorFecha(hoy);
@@ -54,7 +55,7 @@ export function addReserva(
   const nueva: Reserva = {
     ...data,
     id,
-    estado: "confirmado",
+    estado: "pendiente",
     createdAt: new Date().toISOString(),
   };
   reservas.push(nueva);

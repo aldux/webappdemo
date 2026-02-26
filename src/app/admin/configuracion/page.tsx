@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
-import { Settings, Briefcase, Clock, Plus, Pencil, Trash2, Check, X } from "lucide-react";
+import { Settings, Briefcase, Clock, Plus, Pencil, Trash2, Check, X, Palette, ImageIcon } from "lucide-react";
 import { CONFIG_KEY, type Config, type HorarioDia } from "@/lib/config-store";
 
 const DIAS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
@@ -28,6 +28,9 @@ const defaultConfig: Config = {
     desde: "08:00",
     hasta: dia === "Sábado" ? "14:00" : "21:00",
   })),
+  logoUrl: undefined,
+  colorPrimario: "#10b981",
+  colorAcento: "#0d9488",
 };
 
 function loadConfig(): Config {
@@ -41,6 +44,9 @@ function loadConfig(): Config {
       ...parsed,
       servicios: Array.isArray(parsed.servicios) ? parsed.servicios : defaultConfig.servicios,
       horarios: Array.isArray(parsed.horarios) ? parsed.horarios : defaultConfig.horarios,
+      logoUrl: typeof parsed.logoUrl === "string" ? parsed.logoUrl : defaultConfig.logoUrl,
+      colorPrimario: typeof parsed.colorPrimario === "string" ? parsed.colorPrimario : defaultConfig.colorPrimario,
+      colorAcento: typeof parsed.colorAcento === "string" ? parsed.colorAcento : defaultConfig.colorAcento,
     };
   } catch {
     return defaultConfig;
@@ -63,6 +69,9 @@ export default function AdminConfiguracionPage() {
   const [editandoId, setEditandoId] = useState<string | null>(null);
   const [editNombre, setEditNombre] = useState("");
   const [editPrecio, setEditPrecio] = useState("");
+  const [logoUrl, setLogoUrl] = useState("");
+  const [colorPrimario, setColorPrimario] = useState("#10b981");
+  const [colorAcento, setColorAcento] = useState("#0d9488");
 
   useEffect(() => {
     const c = loadConfig();
@@ -71,6 +80,9 @@ export default function AdminConfiguracionPage() {
     setDireccion(c.direccion);
     setServicios(c.servicios);
     setHorarios(c.horarios.length ? c.horarios : defaultConfig.horarios);
+    setLogoUrl(c.logoUrl ?? "");
+    setColorPrimario(c.colorPrimario ?? "#10b981");
+    setColorAcento(c.colorAcento ?? "#0d9488");
   }, []);
 
   const guardarDatosNegocio = () => {
@@ -126,6 +138,33 @@ export default function AdminConfiguracionPage() {
 
   const cancelarEdicion = () => {
     setEditandoId(null);
+  };
+
+  const guardarApariencia = () => {
+    const next = { ...config, logoUrl: logoUrl || undefined, colorPrimario, colorAcento };
+    setConfig(next);
+    saveConfig(next);
+  };
+
+  const onLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      setLogoUrl(dataUrl);
+      const next = { ...config, logoUrl: dataUrl };
+      setConfig(next);
+      saveConfig(next);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const quitarLogo = () => {
+    setLogoUrl("");
+    const next = { ...config, logoUrl: undefined };
+    setConfig(next);
+    saveConfig(next);
   };
 
   return (
@@ -272,6 +311,97 @@ export default function AdminConfiguracionPage() {
           {servicios.length === 0 && (
             <p className="text-sm text-muted-foreground">Aún no hay servicios. Añade el primero arriba.</p>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Apariencia: logo y colores */}
+      <Card className="bg-card">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Palette className="w-5 h-5 text-emerald-500" />
+            Apariencia
+          </CardTitle>
+          <CardDescription>
+            Logo de la empresa y colores del sitio de reservas. El logo se muestra en círculo.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-2">
+            <Label>Logo de la empresa</Label>
+            <div className="flex flex-wrap items-center gap-4">
+              {logoUrl ? (
+                <>
+                  <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-border bg-secondary/50 flex items-center justify-center">
+                    <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
+                  </div>
+                  <div className="flex gap-2">
+                    <Label htmlFor="logo-upload" className="cursor-pointer">
+                      <Button type="button" variant="secondary" asChild>
+                        <span>Cambiar logo</span>
+                      </Button>
+                    </Label>
+                    <Input id="logo-upload" type="file" accept="image/*" className="hidden" onChange={onLogoChange} />
+                    <Button type="button" variant="ghost" className="text-destructive hover:text-destructive" onClick={quitarLogo}>
+                      Quitar logo
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="w-20 h-20 rounded-full border-2 border-dashed border-border bg-secondary/20 flex items-center justify-center">
+                    <ImageIcon className="w-8 h-8 text-muted-foreground" />
+                  </div>
+                  <Label htmlFor="logo-upload" className="cursor-pointer">
+                    <Button type="button" variant="outline" asChild>
+                      <span>Subir logo</span>
+                    </Button>
+                  </Label>
+                  <Input id="logo-upload" type="file" accept="image/*" className="hidden" onChange={onLogoChange} />
+                </>
+              )}
+            </div>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="color-primario">Color primario</Label>
+              <div className="flex gap-2 items-center">
+                <Input
+                  id="color-primario"
+                  type="color"
+                  value={colorPrimario}
+                  onChange={(e) => setColorPrimario(e.target.value)}
+                  className="w-14 h-10 p-1 cursor-pointer"
+                />
+                <Input
+                  value={colorPrimario}
+                  onChange={(e) => setColorPrimario(e.target.value)}
+                  className="flex-1 font-mono text-sm"
+                  placeholder="#10b981"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="color-acento">Color de acento</Label>
+              <div className="flex gap-2 items-center">
+                <Input
+                  id="color-acento"
+                  type="color"
+                  value={colorAcento}
+                  onChange={(e) => setColorAcento(e.target.value)}
+                  className="w-14 h-10 p-1 cursor-pointer"
+                />
+                <Input
+                  value={colorAcento}
+                  onChange={(e) => setColorAcento(e.target.value)}
+                  className="flex-1 font-mono text-sm"
+                  placeholder="#0d9488"
+                />
+              </div>
+            </div>
+          </div>
+          <Button onClick={guardarApariencia} className="bg-emerald-500 hover:bg-emerald-600">
+            Guardar apariencia
+          </Button>
         </CardContent>
       </Card>
 

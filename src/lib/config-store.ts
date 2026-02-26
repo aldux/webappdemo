@@ -7,6 +7,12 @@ export type Config = {
   direccion: string;
   servicios: { id: string; nombre: string; precio: string }[];
   horarios: HorarioDia[];
+  /** URL del logo (data URL base64 o URL externa). Se muestra en círculo en la página de reserva. */
+  logoUrl?: string;
+  /** Color primario en hex (ej. #10b981). Afecta botones y acentos. */
+  colorPrimario?: string;
+  /** Color de acento en hex (ej. #0d9488). Afecta detalles secundarios. */
+  colorAcento?: string;
 };
 
 const DIAS_ORDER = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
@@ -29,6 +35,9 @@ export function loadConfigFromStorage(): Config | null {
       direccion: parsed.direccion ?? "",
       servicios: Array.isArray(parsed.servicios) ? parsed.servicios : [],
       horarios: Array.isArray(parsed.horarios) && parsed.horarios.length ? parsed.horarios : defaultHorarios,
+      logoUrl: typeof parsed.logoUrl === "string" ? parsed.logoUrl : undefined,
+      colorPrimario: typeof parsed.colorPrimario === "string" ? parsed.colorPrimario : undefined,
+      colorAcento: typeof parsed.colorAcento === "string" ? parsed.colorAcento : undefined,
     };
   } catch {
     return null;

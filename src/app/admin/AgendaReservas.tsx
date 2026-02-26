@@ -26,6 +26,11 @@ export function AgendaReservas({ onRefresh }: { onRefresh?: () => void }) {
     refresh();
   };
 
+  const confirmar = (id: string) => {
+    updateReservaEstado(id, "confirmado");
+    refresh();
+  };
+
   return (
     <Card className="bg-card">
       <CardHeader>
@@ -53,7 +58,7 @@ export function AgendaReservas({ onRefresh }: { onRefresh?: () => void }) {
               </TableHeader>
               <TableBody>
                 {reservasHoy.map((r) => (
-                  <TableRow key={r.id} className={r.estado === "cancelado" ? "opacity-60 bg-secondary/10" : ""}>
+                  <TableRow key={r.id} className={r.estado === "cancelado" ? "opacity-60 bg-secondary/10" : undefined}>
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-2">
                         <Clock className="w-4 h-4 text-muted-foreground" />
@@ -76,14 +81,36 @@ export function AgendaReservas({ onRefresh }: { onRefresh?: () => void }) {
                         className={
                           r.estado === "confirmado"
                             ? "border-emerald-500/30 text-emerald-500 bg-emerald-500/10"
-                            : "border-red-500/30 text-red-500 bg-red-500/10"
+                            : r.estado === "pendiente"
+                              ? "border-amber-500/30 text-amber-500 bg-amber-500/10"
+                              : "border-red-500/30 text-red-500 bg-red-500/10"
                         }
                       >
-                        {r.estado === "confirmado" ? "Confirmado" : "Cancelado"}
+                        {r.estado === "confirmado" ? "Confirmado" : r.estado === "pendiente" ? "A confirmar" : "Cancelado"}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      {r.estado === "confirmado" ? (
+                      {r.estado === "pendiente" && (
+                        <>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 text-emerald-500 hover:text-emerald-400 hover:bg-emerald-500/10 gap-1 mr-1"
+                            onClick={() => confirmar(r.id)}
+                          >
+                            Confirmar
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={() => cancelar(r.id)}
+                          >
+                            Cancelar
+                          </Button>
+                        </>
+                      )}
+                      {r.estado === "confirmado" && (
                         <Button
                           variant="ghost"
                           size="sm"
@@ -92,9 +119,8 @@ export function AgendaReservas({ onRefresh }: { onRefresh?: () => void }) {
                         >
                           Cancelar
                         </Button>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">—</span>
                       )}
+                      {r.estado === "cancelado" && <span className="text-xs text-muted-foreground">—</span>}
                     </TableCell>
                   </TableRow>
                 ))}

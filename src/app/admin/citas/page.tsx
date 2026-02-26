@@ -33,6 +33,13 @@ export default function AdminCitasPage() {
     );
   };
 
+  const confirmar = (id: string) => {
+    updateReservaEstado(id, "confirmado");
+    setReservas((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, estado: "confirmado" as const } : r))
+    );
+  };
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div>
@@ -94,25 +101,46 @@ export default function AdminCitasPage() {
                           className={
                             r.estado === "confirmado"
                               ? "border-emerald-500/30 text-emerald-500 bg-emerald-500/10"
-                              : "border-red-500/30 text-red-500 bg-red-500/10"
+                              : r.estado === "pendiente"
+                                ? "border-amber-500/30 text-amber-500 bg-amber-500/10"
+                                : "border-red-500/30 text-red-500 bg-red-500/10"
                           }
                         >
-                          {r.estado === "confirmado" ? "Confirmado" : "Cancelado"}
+                          {r.estado === "confirmado" ? "Confirmado" : r.estado === "pendiente" ? "A confirmar" : "Cancelado"}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                        {r.estado === "confirmado" ? (
+                        {r.estado === "pendiente" && (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 text-emerald-500 hover:bg-emerald-500/10 mr-1"
+                              onClick={() => confirmar(r.id)}
+                            >
+                              Confirmar
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 text-destructive hover:bg-destructive/10"
+                              onClick={() => cancelar(r.id)}
+                            >
+                              Cancelar
+                            </Button>
+                          </>
+                        )}
+                        {r.estado === "confirmado" && (
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            className="h-8 text-destructive hover:bg-destructive/10"
                             onClick={() => cancelar(r.id)}
                           >
                             Cancelar
                           </Button>
-                        ) : (
-                          <span className="text-xs text-muted-foreground">—</span>
                         )}
+                        {r.estado === "cancelado" && <span className="text-xs text-muted-foreground">—</span>}
                       </TableCell>
                     </TableRow>
                   ))}
