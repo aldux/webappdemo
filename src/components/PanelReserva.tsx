@@ -13,7 +13,8 @@ import {
   type Config,
   type HorarioDia,
 } from "@/lib/config-store";
-import { CalendarDays, ChevronRight } from "lucide-react";
+import { addReserva } from "@/lib/reservas-store";
+import { CalendarDays, ChevronRight, CheckCircle2 } from "lucide-react";
 
 const SERVICIOS_DEFAULT = [
   { id: "1", nombre: "Yoga Inicial (60m)", precio: "8500" },
@@ -41,6 +42,7 @@ export function PanelReserva() {
   const [nombre, setNombre] = useState("");
   const [email, setEmail] = useState("");
   const [telefono, setTelefono] = useState("");
+  const [reservaExitosa, setReservaExitosa] = useState(false);
 
   useEffect(() => {
     const c = loadConfigFromStorage();
@@ -56,6 +58,62 @@ export function PanelReserva() {
   const slotsDisponibles = fecha && horarios.length
     ? getSlotsForDay(horarios, getDayNameFromDate(fecha))
     : [];
+
+  const servicioSeleccionado = servicios.find((s) => s.id === servicioId);
+
+  const handleConfirmar = () => {
+    if (!servicioId || !fecha || !slot || !servicioSeleccionado) return;
+    const fechaStr = fecha.toISOString().slice(0, 10);
+    addReserva({
+      fecha: fechaStr,
+      slot,
+      servicioId,
+      servicioNombre: servicioSeleccionado.nombre,
+      precio: servicioSeleccionado.precio,
+      nombre: nombre.trim(),
+      email: email.trim(),
+      telefono: telefono.trim(),
+    });
+    setReservaExitosa(true);
+  };
+
+  const hacerOtraReserva = () => {
+    setReservaExitosa(false);
+    setServicioId(null);
+    setFecha(undefined);
+    setSlot(null);
+    setNombre("");
+    setEmail("");
+    setTelefono("");
+  };
+
+  if (reservaExitosa) {
+    return (
+      <Card className="backdrop-blur-xl bg-background/60 border-border/50 shadow-2xl shadow-black/20 relative z-10 overflow-hidden">
+        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-400 opacity-80" />
+        <CardContent className="pt-8 pb-8">
+          <div className="flex flex-col items-center text-center gap-6">
+            <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center">
+              <CheckCircle2 className="w-10 h-10 text-emerald-500" />
+            </div>
+            <div>
+              <h3 className="text-xl font-semibold text-foreground">Reserva exitosa</h3>
+              <p className="text-muted-foreground mt-1">
+                Tu turno quedó registrado. Te esperamos.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              className="border-emerald-500/50 text-emerald-500 hover:bg-emerald-500/10"
+              onClick={hacerOtraReserva}
+            >
+              Hacer otra reserva
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="backdrop-blur-xl bg-background/60 border-border/50 shadow-2xl shadow-black/20 relative z-10 overflow-hidden">
@@ -182,6 +240,7 @@ export function PanelReserva() {
         <Button
           className="w-full h-12 text-md font-medium bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/20 group transition-all"
           disabled={!servicioId || !fecha || !slot}
+          onClick={handleConfirmar}
         >
           Confirmar Reserva
           <ChevronRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
