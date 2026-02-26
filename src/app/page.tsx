@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ChevronRight, Clock, MapPin, CalendarDays, CheckCircle2 } from "lucide-react";
+import { ChevronRight, Clock, MapPin, CalendarDays } from "lucide-react";
 
 export default function Home() {
   return (

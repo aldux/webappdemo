@@ -1,4 +1,4 @@
-import { CalendarDays, Settings, Users, LayoutDashboard, LogOut } from "lucide-react";
+import { CalendarDays, Settings, Users, LayoutDashboard, LogOut, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -33,6 +33,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         <Settings className="w-5 h-5" />
                         Configuración
                     </Link>
+                    <div className="pt-4 mt-4 border-t border-border/40">
+                        <Link href="/" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-muted-foreground hover:bg-secondary/30 hover:text-foreground transition-colors">
+                            <ExternalLink className="w-5 h-5" />
+                            Ver sitio público
+                        </Link>
+                    </div>
                 </nav>
 
                 <div className="p-4 border-t border-border/40">
@@ -55,13 +61,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             {/* Main Content */}
             <main className="flex-1 overflow-y-auto">
                 <header className="md:hidden border-b border-border/40 p-4 flex items-center justify-between bg-card">
-                    <div className="flex items-center gap-2 font-semibold text-emerald-500">
+                    <Link href="/" className="flex items-center gap-2 font-semibold text-emerald-500">
                         <CalendarDays className="w-5 h-5" />
                         TurnosApp
+                    </Link>
+                    <div className="flex items-center gap-2">
+                        <Link href="/" className="text-xs text-muted-foreground hover:text-foreground">Ver sitio</Link>
+                        <Avatar className="h-8 w-8">
+                            <AvatarFallback className="bg-emerald-500/20 text-emerald-500">ZS</AvatarFallback>
+                        </Avatar>
                     </div>
-                    <Avatar className="h-8 w-8">
-                        <AvatarFallback className="bg-emerald-500/20 text-emerald-500">ZS</AvatarFallback>
-                    </Avatar>
                 </header>
                 <div className="p-6 md:p-10 max-w-6xl mx-auto">
                     {children}
