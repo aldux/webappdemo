@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -7,14 +8,21 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Users, Clock4, Calendar as CalendarIcon } from "lucide-react";
 import { AgendaReservas, useKPIsReservas } from "./AgendaReservas";
+import { loadConfigFromStorage } from "@/lib/config-store";
 
 export function DashboardContent() {
   const { turnosHoy, ingresosHoy, refresh } = useKPIsReservas();
+  const [nombreNegocio, setNombreNegocio] = useState("Zenith Studio");
+
+  useEffect(() => {
+    const config = loadConfigFromStorage();
+    if (config?.nombre) setNombreNegocio(config.nombre);
+  }, []);
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Hola, Zenith Studio 👋</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Hola, {nombreNegocio} 👋</h1>
         <p className="text-muted-foreground mt-1">Este es el resumen de tu comercio para hoy.</p>
       </div>
 
