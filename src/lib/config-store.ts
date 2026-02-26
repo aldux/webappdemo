@@ -36,6 +36,35 @@ export function loadConfigFromStorage(): Config | null {
 }
 
 /** Agrupa horarios consecutivos iguales para mostrar texto corto (ej. "Lunes a Viernes: 08:00 - 21:00") */
+/** Día de la semana en español según índice JS getDay() (0=Dom, 1=Lun, ...) */
+const DIAS_BY_GETDAY = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+
+/** Genera franjas horarias (ej. cada 30 min) entre desde y hasta para un día. */
+export function getSlotsForDay(
+  horarios: HorarioDia[],
+  dayName: string,
+  intervalMinutes: number = 30
+): string[] {
+  const h = horarios.find((x) => x.dia === dayName);
+  if (!h?.abierto) return [];
+  const [desdeH, desdeM] = h.desde.split(":").map(Number);
+  const [hastaH, hastaM] = h.hasta.split(":").map(Number);
+  const start = desdeH * 60 + desdeM;
+  const end = hastaH * 60 + hastaM;
+  const slots: string[] = [];
+  for (let min = start; min < end; min += intervalMinutes) {
+    const hh = Math.floor(min / 60);
+    const mm = min % 60;
+    slots.push(`${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`);
+  }
+  return slots;
+}
+
+/** Dado un Date, devuelve el nombre del día en español (Lunes, Martes, ...). */
+export function getDayNameFromDate(date: Date): string {
+  return DIAS_BY_GETDAY[date.getDay()];
+}
+
 export function formatHorariosParaCliente(horarios: HorarioDia[]): string[] {
   const order = [...horarios].sort(
     (a, b) => DIAS_ORDER.indexOf(a.dia) - DIAS_ORDER.indexOf(b.dia)
