@@ -3,7 +3,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ChevronRight, Clock, MapPin, CalendarDays } from "lucide-react";
+import { HorariosAtencion } from "@/components/HorariosAtencion";
+import { ChevronRight, MapPin, CalendarDays } from "lucide-react";
 
 export default function Home() {
   return (
@@ -38,15 +39,7 @@ export default function Home() {
                 <p className="text-sm">Av. del Libertador 1230, Piso 5<br />Ciudad de Buenos Aires</p>
               </div>
             </div>
-            <div className="flex items-start gap-4 text-muted-foreground group">
-              <div className="bg-secondary/50 p-3 rounded-2xl group-hover:bg-secondary transition-colors">
-                <Clock className="w-5 h-5 text-foreground/80" />
-              </div>
-              <div>
-                <h3 className="font-medium text-foreground">Horarios de atención</h3>
-                <p className="text-sm">Lunes a Viernes: 08:00 - 21:00<br />Sábados: 09:00 - 14:00</p>
-              </div>
-            </div>
+            <HorariosAtencion />
           </div>
         </section>
 
