@@ -6,7 +6,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CalendarDays, Clock } from "lucide-react";
-import { getReservas, updateReservaEstado, type Reserva } from "@/lib/reservas-store";
+import { fetchReservas, updateReservaEstado } from "@/lib/api";
+import type { Reserva } from "@/lib/reservas-store";
 
 function formatFecha(f: string): string {
   const [y, m, d] = f.split("-");
@@ -18,23 +19,24 @@ export default function AdminCitasPage() {
   const [reservas, setReservas] = useState<Reserva[]>([]);
 
   useEffect(() => {
-    const list = getReservas();
-    list.sort((a, b) => {
-      if (a.fecha !== b.fecha) return a.fecha.localeCompare(b.fecha);
-      return a.slot.localeCompare(b.slot);
+    fetchReservas().then((list) => {
+      list.sort((a, b) => {
+        if (a.fecha !== b.fecha) return a.fecha.localeCompare(b.fecha);
+        return a.slot.localeCompare(b.slot);
+      });
+      setReservas(list);
     });
-    setReservas(list);
   }, []);
 
-  const cancelar = (id: string) => {
-    updateReservaEstado(id, "cancelado");
+  const cancelar = async (id: string) => {
+    await updateReservaEstado(id, "cancelado");
     setReservas((prev) =>
       prev.map((r) => (r.id === id ? { ...r, estado: "cancelado" as const } : r))
     );
   };
 
-  const confirmar = (id: string) => {
-    updateReservaEstado(id, "confirmado");
+  const confirmar = async (id: string) => {
+    await updateReservaEstado(id, "confirmado");
     setReservas((prev) =>
       prev.map((r) => (r.id === id ? { ...r, estado: "confirmado" as const } : r))
     );

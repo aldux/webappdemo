@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Clock } from "lucide-react";
-import { loadConfigFromStorage, formatHorariosParaCliente } from "@/lib/config-store";
+import { fetchConfig } from "@/lib/api";
+import { formatHorariosParaCliente } from "@/lib/config-store";
 
 const horariosPorDefecto = [
   "Lunes a Viernes: 08:00 - 21:00",
@@ -14,10 +15,11 @@ export function HorariosAtencion() {
   const [lineas, setLineas] = useState<string[]>(horariosPorDefecto);
 
   useEffect(() => {
-    const config = loadConfigFromStorage();
-    if (config?.horarios?.length) {
-      setLineas(formatHorariosParaCliente(config.horarios));
-    }
+    fetchConfig().then((config) => {
+      if (config?.horarios?.length) {
+        setLineas(formatHorariosParaCliente(config.horarios));
+      }
+    });
   }, []);
 
   return (

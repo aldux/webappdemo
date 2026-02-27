@@ -8,15 +8,16 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Users, Clock4, Calendar as CalendarIcon } from "lucide-react";
 import { AgendaReservas, useKPIsReservas } from "./AgendaReservas";
-import { loadConfigFromStorage } from "@/lib/config-store";
+import { fetchConfig } from "@/lib/api";
 
 export function DashboardContent() {
   const { turnosHoy, ingresosHoy, refresh } = useKPIsReservas();
   const [nombreNegocio, setNombreNegocio] = useState("Zenith Studio");
 
   useEffect(() => {
-    const config = loadConfigFromStorage();
-    if (config?.nombre) setNombreNegocio(config.nombre);
+    fetchConfig().then((config) => {
+      if (config?.nombre) setNombreNegocio(config.nombre);
+    });
   }, []);
 
   return (

@@ -6,14 +6,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Clock } from "lucide-react";
-import { getReservasHoy, updateReservaEstado, type Reserva } from "@/lib/reservas-store";
+import { fetchReservas, updateReservaEstado } from "@/lib/api";
+import type { Reserva } from "@/lib/reservas-store";
 
 export function AgendaReservas({ onRefresh }: { onRefresh?: () => void }) {
   const [reservasHoy, setReservasHoy] = useState<Reserva[]>([]);
 
-  const refresh = () => {
-    const next = getReservasHoy().sort((a, b) => a.slot.localeCompare(b.slot));
-    setReservasHoy(next);
+  const refresh = async () => {
+    const hoy = new Date().toISOString().slice(0, 10);
+    const list = await fetchReservas(hoy);
+    setReservasHoy(list.sort((a, b) => a.slot.localeCompare(b.slot)));
     onRefresh?.();
   };
 
@@ -21,13 +23,13 @@ export function AgendaReservas({ onRefresh }: { onRefresh?: () => void }) {
     refresh();
   }, []);
 
-  const cancelar = (id: string) => {
-    updateReservaEstado(id, "cancelado");
+  const cancelar = async (id: string) => {
+    await updateReservaEstado(id, "cancelado");
     refresh();
   };
 
-  const confirmar = (id: string) => {
-    updateReservaEstado(id, "confirmado");
+  const confirmar = async (id: string) => {
+    await updateReservaEstado(id, "confirmado");
     refresh();
   };
 
@@ -137,10 +139,11 @@ export function useKPIsReservas(refreshDeps: unknown[] = []) {
   const [turnosHoy, setTurnosHoy] = useState(0);
   const [ingresosHoy, setIngresosHoy] = useState(0);
 
-  const refresh = () => {
-    const hoy = getReservasHoy();
-    setTurnosHoy(hoy.length);
-    setIngresosHoy(hoy.reduce((sum, r) => sum + (Number(r.precio) || 0), 0));
+  const refresh = async () => {
+    const hoy = new Date().toISOString().slice(0, 10);
+    const list = await fetchReservas(hoy);
+    setTurnosHoy(list.length);
+    setIngresosHoy(list.reduce((sum, r) => sum + (Number(r.precio) || 0), 0));
   };
 
   useEffect(() => {

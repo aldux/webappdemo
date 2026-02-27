@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LogOut } from "lucide-react";
-import { loadConfigFromStorage } from "@/lib/config-store";
+import { fetchConfig } from "@/lib/api";
 
 function iniciales(nombre: string): string {
   const partes = nombre.trim().split(/\s+/);
@@ -18,9 +18,10 @@ export function AdminSidebarUser() {
   const [logoUrl, setLogoUrl] = useState<string | undefined>();
 
   useEffect(() => {
-    const config = loadConfigFromStorage();
-    if (config?.nombre) setNombre(config.nombre);
-    if (config?.logoUrl) setLogoUrl(config.logoUrl);
+    fetchConfig().then((config) => {
+      if (config?.nombre) setNombre(config.nombre);
+      if (config?.logoUrl) setLogoUrl(config.logoUrl);
+    });
   }, []);
 
   return (

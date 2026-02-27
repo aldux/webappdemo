@@ -5,7 +5,7 @@ import { HorariosAtencion } from "@/components/HorariosAtencion";
 import { PanelReserva } from "@/components/PanelReserva";
 import { ThemeFromConfig } from "@/components/ThemeFromConfig";
 import { MapPin } from "lucide-react";
-import { loadConfigFromStorage } from "@/lib/config-store";
+import { fetchConfig } from "@/lib/api";
 
 export function PaginaReservaClient() {
   const [nombre, setNombre] = useState("Zenith Studio");
@@ -13,12 +13,13 @@ export function PaginaReservaClient() {
   const [logoUrl, setLogoUrl] = useState<string | undefined>();
 
   useEffect(() => {
-    const c = loadConfigFromStorage();
-    if (c) {
-      setNombre(c.nombre || "Zenith Studio");
-      setDireccion(c.direccion || "");
-      setLogoUrl(c.logoUrl);
-    }
+    fetchConfig().then((c) => {
+      if (c) {
+        setNombre(c.nombre || "Zenith Studio");
+        setDireccion(c.direccion || "");
+        setLogoUrl(c.logoUrl);
+      }
+    });
   }, []);
 
   return (

@@ -8,7 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { Settings, Briefcase, Clock, Plus, Pencil, Trash2, Check, X, Palette, ImageIcon } from "lucide-react";
-import { CONFIG_KEY, type Config, type HorarioDia } from "@/lib/config-store";
+import { fetchConfig, saveConfig as saveConfigToApi } from "@/lib/api";
+import { type Config, type HorarioDia } from "@/lib/config-store";
 
 const DIAS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
 
@@ -33,31 +34,6 @@ const defaultConfig: Config = {
   colorAcento: "#0d9488",
 };
 
-function loadConfig(): Config {
-  if (typeof window === "undefined") return defaultConfig;
-  try {
-    const s = localStorage.getItem(CONFIG_KEY);
-    if (!s) return defaultConfig;
-    const parsed = JSON.parse(s) as Config;
-    return {
-      ...defaultConfig,
-      ...parsed,
-      servicios: Array.isArray(parsed.servicios) ? parsed.servicios : defaultConfig.servicios,
-      horarios: Array.isArray(parsed.horarios) ? parsed.horarios : defaultConfig.horarios,
-      logoUrl: typeof parsed.logoUrl === "string" ? parsed.logoUrl : defaultConfig.logoUrl,
-      colorPrimario: typeof parsed.colorPrimario === "string" ? parsed.colorPrimario : defaultConfig.colorPrimario,
-      colorAcento: typeof parsed.colorAcento === "string" ? parsed.colorAcento : defaultConfig.colorAcento,
-    };
-  } catch {
-    return defaultConfig;
-  }
-}
-
-function saveConfig(config: Config) {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
-}
-
 export default function AdminConfiguracionPage() {
   const [config, setConfig] = useState<Config>(defaultConfig);
   const [nombre, setNombre] = useState("");
@@ -74,30 +50,32 @@ export default function AdminConfiguracionPage() {
   const [colorAcento, setColorAcento] = useState("#0d9488");
 
   useEffect(() => {
-    const c = loadConfig();
-    setConfig(c);
-    setNombre(c.nombre);
-    setDireccion(c.direccion);
-    setServicios(c.servicios);
-    setHorarios(c.horarios.length ? c.horarios : defaultConfig.horarios);
-    setLogoUrl(c.logoUrl ?? "");
-    setColorPrimario(c.colorPrimario ?? "#10b981");
-    setColorAcento(c.colorAcento ?? "#0d9488");
+    fetchConfig().then((c) => {
+      if (!c) return;
+      setConfig(c);
+      setNombre(c.nombre);
+      setDireccion(c.direccion);
+      setServicios(c.servicios);
+      setHorarios(c.horarios.length ? c.horarios : defaultConfig.horarios);
+      setLogoUrl(c.logoUrl ?? "");
+      setColorPrimario(c.colorPrimario ?? "#10b981");
+      setColorAcento(c.colorAcento ?? "#0d9488");
+    });
   }, []);
 
-  const guardarDatosNegocio = () => {
+  const guardarDatosNegocio = async () => {
     const next = { ...config, nombre, direccion };
     setConfig(next);
-    saveConfig(next);
+    await saveConfigToApi(next);
   };
 
-  const actualizarHorario = (index: number, upd: Partial<HorarioDia>) => {
+  const actualizarHorario = async (index: number, upd: Partial<HorarioDia>) => {
     const next = horarios.map((h, i) => (i === index ? { ...h, ...upd } : h));
     setHorarios(next);
-    saveConfig({ ...config, horarios: next });
+    await saveConfigToApi({ ...config, horarios: next });
   };
 
-  const añadirServicio = () => {
+  const añadirServicio = async () => {
     if (!nuevoServicioNombre.trim()) return;
     const id = String(Date.now());
     const next = [...servicios, { id, nombre: nuevoServicioNombre.trim(), precio: nuevoServicioPrecio.trim() || "0" }];
@@ -106,15 +84,15 @@ export default function AdminConfiguracionPage() {
     setNuevoServicioPrecio("");
     const nextConfig = { ...config, servicios: next };
     setConfig(nextConfig);
-    saveConfig(nextConfig);
+    await saveConfigToApi(nextConfig);
   };
 
-  const eliminarServicio = (id: string) => {
+  const eliminarServicio = async (id: string) => {
     const next = servicios.filter((s) => s.id !== id);
     setServicios(next);
     const nextConfig = { ...config, servicios: next };
     setConfig(nextConfig);
-    saveConfig(nextConfig);
+    await saveConfigToApi(nextConfig);
     if (editandoId === id) setEditandoId(null);
   };
 
@@ -124,7 +102,7 @@ export default function AdminConfiguracionPage() {
     setEditPrecio(s.precio);
   };
 
-  const guardarEdicion = () => {
+  const guardarEdicion = async () => {
     if (editandoId == null) return;
     const next = servicios.map((s) =>
       s.id === editandoId ? { ...s, nombre: editNombre.trim(), precio: editPrecio.trim() } : s
@@ -133,38 +111,38 @@ export default function AdminConfiguracionPage() {
     setEditandoId(null);
     const nextConfig = { ...config, servicios: next };
     setConfig(nextConfig);
-    saveConfig(nextConfig);
+    await saveConfigToApi(nextConfig);
   };
 
   const cancelarEdicion = () => {
     setEditandoId(null);
   };
 
-  const guardarApariencia = () => {
+  const guardarApariencia = async () => {
     const next = { ...config, logoUrl: logoUrl || undefined, colorPrimario, colorAcento };
     setConfig(next);
-    saveConfig(next);
+    await saveConfigToApi(next);
   };
 
   const onLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.onload = async () => {
       const dataUrl = reader.result as string;
       setLogoUrl(dataUrl);
       const next = { ...config, logoUrl: dataUrl };
       setConfig(next);
-      saveConfig(next);
+      await saveConfigToApi(next);
     };
     reader.readAsDataURL(file);
   };
 
-  const quitarLogo = () => {
+  const quitarLogo = async () => {
     setLogoUrl("");
     const next = { ...config, logoUrl: undefined };
     setConfig(next);
-    saveConfig(next);
+    await saveConfigToApi(next);
   };
 
   return (

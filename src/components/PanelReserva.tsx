@@ -7,13 +7,13 @@ import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  loadConfigFromStorage,
   getSlotsForDay,
   getDayNameFromDate,
   type Config,
   type HorarioDia,
 } from "@/lib/config-store";
-import { addReserva } from "@/lib/reservas-store";
+import { fetchConfig } from "@/lib/api";
+import { createReserva } from "@/lib/api";
 import { CalendarDays, ChevronRight, CheckCircle2 } from "lucide-react";
 
 const SERVICIOS_DEFAULT = [
@@ -45,14 +45,15 @@ export function PanelReserva({ logoUrl }: { logoUrl?: string }) {
   const [reservaExitosa, setReservaExitosa] = useState(false);
 
   useEffect(() => {
-    const c = loadConfigFromStorage();
-    if (c) {
-      setConfig(c);
-      setServicios(c.servicios.length ? c.servicios : SERVICIOS_DEFAULT);
-      setHorarios(c.horarios.length ? c.horarios : HORARIOS_DEFAULT);
-    } else {
-      setHorarios(HORARIOS_DEFAULT);
-    }
+    fetchConfig().then((c) => {
+      if (c) {
+        setConfig(c);
+        setServicios(c.servicios.length ? c.servicios : SERVICIOS_DEFAULT);
+        setHorarios(c.horarios.length ? c.horarios : HORARIOS_DEFAULT);
+      } else {
+        setHorarios(HORARIOS_DEFAULT);
+      }
+    });
   }, []);
 
   const slotsDisponibles = fecha && horarios.length
@@ -61,10 +62,10 @@ export function PanelReserva({ logoUrl }: { logoUrl?: string }) {
 
   const servicioSeleccionado = servicios.find((s) => s.id === servicioId);
 
-  const handleConfirmar = () => {
+  const handleConfirmar = async () => {
     if (!servicioId || !fecha || !slot || !servicioSeleccionado) return;
     const fechaStr = fecha.toISOString().slice(0, 10);
-    addReserva({
+    const ok = await createReserva({
       fecha: fechaStr,
       slot,
       servicioId,
@@ -74,7 +75,7 @@ export function PanelReserva({ logoUrl }: { logoUrl?: string }) {
       email: email.trim(),
       telefono: telefono.trim(),
     });
-    setReservaExitosa(true);
+    if (ok) setReservaExitosa(true);
   };
 
   const hacerOtraReserva = () => {
